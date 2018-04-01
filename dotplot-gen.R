@@ -1,5 +1,4 @@
 library(ggplot2)
-library(reshape2)
 library(gridExtra)
 
 #################################################
@@ -13,11 +12,14 @@ insertion <- function(sequence, where, what)
     ## NOTE: there is no control for negative =where='s
 {
     if(where!=0){
-        insertion <- c(sequence[1:where],what,sequence[where:length(sequence)]);        
+        sequence <- c(sequence[1:where],what,sequence[where:length(sequence)]);
     }else{
-        insertion <- c(what,sequence);        
+        sequence <- c(what,sequence);        
         
     }
+
+    return(list(paste("Insertion of",length(what),"symbols at",where),sequence));
+
 }
 
 inversion <- function(sequence, where, howLong)
@@ -34,14 +36,15 @@ inversion <- function(sequence, where, howLong)
     return(list(paste("Inversion of", howLong,"pos, starting from",where),sequence));
 }
 
+
 ## Plotting function
 drawDotplot <- function(s1,s2)
 {
     df = data.frame(seq1=s1,seq2=s2);
     ggplot(df,aes(x=seq1,y=seq2))+
         geom_point(color="blue")+
-        xlab("Sequence 1")+
-        ylab("Sequence 2")
+        xlab("Sequence 1 (position numbers)")+
+        ylab("Sequence 2 (position numbers)")
 }
 
 ################################################# 
@@ -54,31 +57,42 @@ maxDepth <- 5; # maximum number of the events to be applied to the sequence
 numExamples <- 2; # number of files to generate
 numEvents <- 5;
 
+distLength <- round(seqLength/2);
 ## distortion probabilities (conditional on that some event occurs)
 insertionProb = 0.5;
-inverstionProb = 0.5;
+inverstionProb = 1-insertionProb;
 
 
-seq1 = 1:seqLength;
+seq1 = 1:seqLength; ## initialize ``sequence''
 
 for (ex in 1:numExamples)
 {
     s = list();
     plots = list();
     seq = seq1;
-    s[[1]] = list("Initial sequence",seq);
 
-    plots[1] = drawDotplot(seq1,seq);
+    s[[1]] = list("Initial sequence",seq);
+    plots[[1]] = drawDotplot(seq1,seq)+ggtitle(s[[1]][[1]]);
     
     for (event in 1:numEvents)
     {
         ## generate where and howLong
         where=2;
         howLong = 10;
-        s[[event+1]] = inversion(seq,where,howLong);
+
+        rndPosition = runif(1,1,seqLength); # random distortion position (uniformely distributed)
+        rndDistLength = runif(1,1,distLength); # random distortion length (also uniform)
+        
+        if(runif(1,0,1)<=insertionProb){
+            s[[event+1]] = insertion(seq,rndPosition,rep(seqLength*1.1,times=rndDistLength));
+        }else{
+            s[[event+1]] = inversion(seq,rndPosition,rndDistLength);
+
+        }
+       
         seq = s[[event+1]][[2]];
         plots[[event+1]] = drawDotplot(seq1,seq)+
-            ggtitle(s[[event+1]][[2]]);
+            ggtitle(s[[event+1]][[1]]);
     }
 
     ## save sample (final) dotplot
@@ -87,7 +101,7 @@ for (ex in 1:numExamples)
 
     ## save solution
     png(paste("./Sample",ex,sep="_"),width=19.3,height=10.9,units="in",res=300);
-    do.call("grid.arrange", plots,ncol=3);
+    do.call("grid.arrange",c(plots,ncol=3));
     dev.off();
     
 }
