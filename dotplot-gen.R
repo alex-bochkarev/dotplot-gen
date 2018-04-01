@@ -1,21 +1,26 @@
 library(ggplot2)
 library(gridExtra)
+library(grid)
 
 #################################################
 ## Auxiliary functions
+################################################# 
 
 ## Allowed distortion functions
 insertion <- function(sequence, where, what)
+    ## INPUT:
     ## sequence = vector of elements
     ## where = after which position to insert; indexing starts from ONE
     ## what = what to insert
-    ## NOTE: there is no control for negative =where='s
+    ## OUTPUT:
+    ## a list of 2 elements: {text-description(character), new-sequence}
+    ## NOTES:
+    ## if =where= <= 0 then the inversion is assumed to start from the first block
 {
-    if(where!=0){
+    if(where>0){
         sequence <- c(sequence[1:where],what,sequence[where:length(sequence)]);
     }else{
         sequence <- c(what,sequence);        
-        
     }
 
     return(list(paste("Insertion of",length(what),"symbols at",where),sequence));
@@ -41,8 +46,8 @@ inversion <- function(sequence, where, howLong)
 drawDotplot <- function(s_reference,s_query)
 {
 
-    points_to_draw = lapply(1:length(s_query),function(s){
-        Ys = which(s_reference==s_query[s])
+    points_to_draw = lapply(1:length(s_reference),function(s){
+        Ys = which(s_reference[s]==s_query)
         Xs = rep(s,times=length(Ys))
         cbind(Xs,Ys)
     });
@@ -50,13 +55,15 @@ drawDotplot <- function(s_reference,s_query)
     ggplot(do.call(rbind.data.frame, points_to_draw),
            aes(x=Xs,y=Ys)) +
         geom_point(color="blue")+
-        xlab("Sequence 1 (position numbers)")+
-        ylab("Sequence 2 (position numbers)")
+        xlab("Sequence 1 -- reference")+
+        ylab("Sequence 2 -- query")
 }
 
 ################################################# 
 ## Client block
+################################################# 
 
+################################################# 
 ## basic constants
     
 seqLength <- 100; # length of the sequences to be compared
@@ -70,7 +77,7 @@ insertionProb = 0.5;
 inverstionProb = 1-insertionProb;
 
 
-seq1 = as.character(1:seqLength); ## initialize ``sequence''
+seq1 = paste("block",as.character(1:seqLength),sep="_"); ## initialize the ``sequence''
 
 
 for (ex in 1:numExamples)
@@ -102,11 +109,11 @@ for (ex in 1:numExamples)
 
     ## save sample (final) dotplot
     drawDotplot(seq1,seq)+
-        ggtitle(paste("Sample dotplot, variant ",ex));
+        ggtitle(paste("Sample (final) dotplot No.",ex));
 
     ## save solution
     png(paste("./Sample",ex,sep="_"),width=19.3,height=10.9,units="in",res=300);
-    do.call("grid.arrange",c(plots,ncol=3));
+    grid.arrange(grobs=plots, top=textGrob(paste("Sample dotpot No.",ex,": stepwise"),gp=gpar(fontsize=20,font=3)),ncol=3);
     dev.off();
     
 }
