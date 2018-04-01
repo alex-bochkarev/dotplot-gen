@@ -27,6 +27,26 @@ insertion <- function(sequence, where, what)
 
 }
 
+deletion <- function(sequence, where, howLong)
+    ## INPUT:
+    ## sequence = vector of elements
+    ## where = starting from which position to delete; indexing starts from ONE
+    ## howLong = number of positions (blocks) to delete
+    ## OUTPUT:
+    ## a list of 2 elements: {text-description(character), new-sequence}
+    ## NOTES:
+    ## 1) if =where= <= 0 then the deletion is assumed to start from the first block
+    ## 2) if =howLong= <= 0 then ONE symbol is deleted
+{
+
+    if (howLong<=0) howLong <- 1;
+    if (where<=1) where <- 1;
+    
+    indices <- setdiff(1:length(sequence),(where):(where+howLong-1));
+
+    return(list(paste("Deletion of",howLong,"blocks starting from",where),sequence[indices]));
+}
+
 inversion <- function(sequence, where, howLong)
     ## sequence = vector of elements
     ## where = invert starting from which position; indexing starts from ONE
@@ -68,16 +88,20 @@ drawDotplot <- function(s_reference,s_query)
     
 seqLength <- 100; # length of the sequences to be compared
 maxDepth <- 5; # maximum number of the events to be applied to the sequence
-numExamples <- 2; # number of files to generate
+numExamples <- 5; # number of files to generate
 numEvents <- 5;
 
 distLength <- round(seqLength/2);
-## distortion probabilities (conditional on that some event occurs)
-insertionProb = 0.5;
-inverstionProb = 1-insertionProb;
+
+## distortions probabilities (conditional on that some event occurs)
+insertionProb = 0.3;
+inversionProb = 0.4;
+deletionProb = 1 - insertionProb - inversionProb;
 
 
 seq1 = paste("block",as.character(1:seqLength),sep="_"); ## initialize the ``sequence''
+
+insBlock = "block_INS"; ## the block that will be inserted during insertions
 
 
 for (ex in 1:numExamples)
@@ -92,35 +116,40 @@ for (ex in 1:numExamples)
     for (event in 1:numEvents)
     {
         ## generate where and howLong
-        rndPosition = round(runif(1,1,seqLength)); # random distortion position (uniformely distributed)
-        rndDistLength = round(runif(1,1,distLength)); # random distortion length (also uniform)
-        
-        if(runif(1,0,1)<=insertionProb){
-            s[[event+1]] = insertion(seq,rndPosition,rep(seqLength*1.1,times=rndDistLength));
-        }else{
+        rndPosition = round(runif(1,1,length(seq))); # random distortion position (uniformely distributed)
+
+        eventProb = runif(1,0,1);
+
+        if(eventProb<=insertionProb){
+            ## INSERTION happened
+            rndDistLength = round(runif(1,1,round(length(seq)/2))); # random distortion length (also uniform)
+            s[[event+1]] = insertion(seq,rndPosition,rep(insBlock,times=rndDistLength));
+        }else if(eventProb<=insertionProb+inversionProb){
+            ## INVERSION happened
+            rndDistLength = round(runif(1,1,round(length(seq)/2))); # random distortion length (also uniform)
             s[[event+1]] = inversion(seq,rndPosition,rndDistLength);
 
+        }else if(eventProb>insertionProb+inverstionProb){
+            ## DELETION happened
+            rndDistLength = round(runif(1,1,round(length(seq)/2))); # random distortion length (also uniform)
+            s[[event+1]] = deletion(seq,rndPosition,rndDistLength);
+            
         }
        
         seq = s[[event+1]][[2]];
-        plots[[event+1]] = drawDotplot(seq1,seq)+
+        plots[[event+1]] = drawDotplot(s_reference=seq1,s_query=seq)+
             ggtitle(s[[event+1]][[1]]);
     }
 
     ## save sample (final) dotplot
-    drawDotplot(seq1,seq)+
-        ggtitle(paste("Sample (final) dotplot No.",ex));
 
-    ## save solution
-    png(paste("./Sample",ex,sep="_"),width=19.3,height=10.9,units="in",res=300);
-    grid.arrange(grobs=plots, top=textGrob(paste("Sample dotpot No.",ex,": stepwise"),gp=gpar(fontsize=20,font=3)),ncol=3);
+    png(paste("./samples/Sample_",ex,".png",sep=""),width=19.3,height=10.9,units="in",res=300);    
+    print(drawDotplot(s_reference = seq1,s_query=seq)+
+        ggtitle(paste("Sample (final) dotplot No.",ex)));
     dev.off();
-    
+
+    ## save stepwise transformation
+    png(paste("./stepwise/Sample_",ex,"_stepwise.png",sep=""),width=19.3,height=10.9,units="in",res=300);
+    grid.arrange(grobs=plots, top=textGrob(paste("Sample dotpot No.",ex,": stepwise"),gp=gpar(fontsize=20,font=3)),ncol=3);
+    dev.off();    
 }
-
-## generate events
-
-## make answers
-
-### add step-wise-answers
-
