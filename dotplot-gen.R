@@ -38,10 +38,17 @@ inversion <- function(sequence, where, howLong)
 
 
 ## Plotting function
-drawDotplot <- function(s1,s2)
+drawDotplot <- function(s_reference,s_query)
 {
-    df = data.frame(seq1=s1,seq2=s2);
-    ggplot(df,aes(x=seq1,y=seq2))+
+
+    points_to_draw = lapply(1:length(s_query),function(s){
+        Ys = which(s_reference==s_query[s])
+        Xs = rep(s,times=length(Ys))
+        cbind(Xs,Ys)
+    });
+
+    ggplot(do.call(rbind.data.frame, points_to_draw),
+           aes(x=Xs,y=Ys)) +
         geom_point(color="blue")+
         xlab("Sequence 1 (position numbers)")+
         ylab("Sequence 2 (position numbers)")
@@ -63,7 +70,8 @@ insertionProb = 0.5;
 inverstionProb = 1-insertionProb;
 
 
-seq1 = 1:seqLength; ## initialize ``sequence''
+seq1 = as.character(1:seqLength); ## initialize ``sequence''
+
 
 for (ex in 1:numExamples)
 {
@@ -77,11 +85,8 @@ for (ex in 1:numExamples)
     for (event in 1:numEvents)
     {
         ## generate where and howLong
-        where=2;
-        howLong = 10;
-
-        rndPosition = runif(1,1,seqLength); # random distortion position (uniformely distributed)
-        rndDistLength = runif(1,1,distLength); # random distortion length (also uniform)
+        rndPosition = round(runif(1,1,seqLength)); # random distortion position (uniformely distributed)
+        rndDistLength = round(runif(1,1,distLength)); # random distortion length (also uniform)
         
         if(runif(1,0,1)<=insertionProb){
             s[[event+1]] = insertion(seq,rndPosition,rep(seqLength*1.1,times=rndDistLength));
