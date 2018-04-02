@@ -37,6 +37,7 @@ install.packages("gridExtra")
 
 ## Key tuning parameters
 The key parameters to be tuned are set in one place in `dotplot-gen.R`:
+
 | Parameter   | Default value | Description                                                 |
 |:------------|---------------|:------------------------------------------------------------|
 | seqLength   | 100           | length of the sequences to be generated                     |
