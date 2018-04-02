@@ -1,4 +1,4 @@
-## A dotplot-sample generation utilities
+# A dotplot-sample generation utilities
 
 This is a small script to generate:
 - sample (randomly generated) [dot-plot](https://en.wikipedia.org/wiki/Dot_plot_(bioinformatics)) graphs in `png` format;
@@ -8,7 +8,20 @@ As a by-product the script offers several [functions](#useful-functions) that mi
 
 The script relies on `ggplot2`, `grid` and `gridExtra` packages for visualization.
 
-## Usage for dotplots generation
+# Getting started
+No additional installation required -- just download two `.R`-files or [clone the repo](https://help.github.com/articles/cloning-a-repository/).
+
+## Prerequesites
+
+These are [R](https://www.r-project.org/) scripts. If necessary packages are not installed, you might need to do that (from within `R` console):
+```R
+install.packages("ggplot2")
+install.packages("grid")
+install.packages("gridExtra")
+```
+
+# Usage and fine-tuning
+## Main purpose -- dotplots generation
 - review and refine generation [parameters](#key-tuning-parameters) if necessary;
 - run the `dotplot-gen.R` script (it will load `dotplot-aux.R` with function definitions automatically), e.g.
   ```R
