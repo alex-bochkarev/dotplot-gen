@@ -12,8 +12,8 @@ library(ggplot2)
 library(gridExtra)
 library(grid)
 
-no_of_Xticks <- 30;
-no_of_Yticks <- no_of_Xticks;
+no_of_Xticks <- 30; ## number of ticks along the X axis
+no_of_Yticks <- no_of_Xticks; ## --//--//-- Y axis
 
 ################################################# 
 ## Allowed distortion functions
@@ -23,8 +23,10 @@ insertion <- function(sequence, where, what, returnText=FALSE)
     ## sequence = vector of elements (blocks)
     ## where = after which position (block) to insert; indexing starts from ONE
     ## what = what to insert
+    ## returnText = logical, whether return sequence only (if FALSE) or sequence+text
     ## OUTPUT:
     ## a list of 2 elements: {text-description(character), new-sequence}
+    ## or new-sequence (if returnText==FALSE)
     ## NOTES:
     ## if =where= <= 0 then the inversion is assumed to start from the first block
 {
@@ -47,8 +49,10 @@ deletion <- function(sequence, where, howLong, returnText=FALSE)
     ## sequence = vector of elements (blocks)
     ## where = starting from which position to delete; indexing starts from ONE
     ## howLong = number of positions (blocks) to delete
+    ## returnText = logical, whether return sequence only (if FALSE) or sequence+text
     ## OUTPUT:
     ## a list of 2 elements: {text-description(character), new-sequence}
+    ## or new-sequence (if returnText==FALSE)
     ## NOTES:
     ## 1) if =where= <= 0 then the deletion is assumed to start from the first block
     ## 2) if =howLong= <= 0 then ONE symbol is deleted
@@ -66,24 +70,25 @@ deletion <- function(sequence, where, howLong, returnText=FALSE)
     }
 }
 
-inversion <- function(sequence, where, howLong, returnText=FALSE, returnColor=FALSE)
+inversion <- function(sequence, where, howLong, returnText=FALSE, invertColor=FALSE)
     ## INPUT:
     ## sequence = vector of elements (blocks)
     ## where = invert starting from which position (block); indexing starts from ONE
     ## howLogn = inversion length (in blocks)
+    ## returnText = logical, whether return sequence only (if FALSE) or sequence+text
+    ## invertColor = logical; used when the inverted sequence has to be logically inverted (apply NOT to the inverted part of the sequence -- used to track color)
     ## OUTPUT:
     ## a list of 2 elements: {text-description(character), new-sequence}   
+    ## or new-sequence (if returnText==FALSE)
 {
 
     ## ensure we won't go further than the right side
     where = min(where,length(sequence)); 
     howLong = min(howLong, length(sequence) - where+1);
 
-    if(!returnColor){
-        sequence[where:(where+howLong-1)] <- rev(sequence[where:(where+howLong-1)]);
-    }else{
-        sequence[where:(where+howLong-1)] <- !(sequence[where:(where+howLong-1)]);
-    }
+    sequence[where:(where+howLong-1)] <- rev(sequence[where:(where+howLong-1)]);
+
+    if(invertColor) sequence[where:(where+howLong-1)] <- !sequence[where:(where+howLong-1)]; ## used if =sequence= is actually a description of the color of each point in the sequence (FALSE/TRUE corresponding to "initial"/"new")   
     
     if(returnText){
         return(list(paste("Inversion starting from", where,",",howLong,"blocks"),sequence));
@@ -98,6 +103,8 @@ drawDotplot <- function(s_reference,s_query,s_query_changed_color=NULL)
     ## INPUT:
     ## s_reference -- an atomic vector of reference sequence (will be along Ox axis)
     ## s_query -- an atomic vector of query sequence (will be along Oy axis)
+    ## s_query_changed_color -- a logical vector; if used, the function draws
+    ## all =s_query= points marked as FALSE with =blue= color and =red= otherwise
     ## OUTPUT:
     ## ggplot object of the corresponding dotplot
 {
