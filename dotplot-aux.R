@@ -35,7 +35,7 @@ insertion <- function(sequence, where, what, returnText=FALSE)
     }
 
     if(returnText){
-        return(list(paste("Insertion of",length(what),"symbols at",where),sequence));
+        return(list(paste("Insertion after pos.",where, ",",length(what), "blocks"),sequence));
     }else{
         return(sequence);
     }
@@ -60,13 +60,13 @@ deletion <- function(sequence, where, howLong, returnText=FALSE)
     indices <- setdiff(1:length(sequence),(where):(where+howLong-1));
 
     if(returnText){
-        return(list(paste("Deletion of",howLong,"blocks starting from",where),sequence[indices]));
+        return(list(paste("Deletion starting from",where,",",howLong,"blocks"),sequence[indices]));
     }else{
         return(sequence[indices]);
     }
 }
 
-inversion <- function(sequence, where, howLong, returnText=FALSE)
+inversion <- function(sequence, where, howLong, returnText=FALSE, returnColor=FALSE)
     ## INPUT:
     ## sequence = vector of elements (blocks)
     ## where = invert starting from which position (block); indexing starts from ONE
@@ -78,11 +78,15 @@ inversion <- function(sequence, where, howLong, returnText=FALSE)
     ## ensure we won't go further than the right side
     where = min(where,length(sequence)); 
     howLong = min(howLong, length(sequence) - where+1);
-    
-    sequence[where:(where+howLong-1)] <- rev(sequence[where:(where+howLong-1)]);
 
+    if(!returnColor){
+        sequence[where:(where+howLong-1)] <- rev(sequence[where:(where+howLong-1)]);
+    }else{
+        sequence[where:(where+howLong-1)] <- !(sequence[where:(where+howLong-1)]);
+    }
+    
     if(returnText){
-        return(list(paste("Inversion of", howLong,"pos, starting from",where),sequence));
+        return(list(paste("Inversion starting from", where,",",howLong,"blocks"),sequence));
     }else{
         return(sequence);
     }
@@ -90,7 +94,7 @@ inversion <- function(sequence, where, howLong, returnText=FALSE)
 
 
 ## Dotplot drawing function
-drawDotplot <- function(s_reference,s_query)
+drawDotplot <- function(s_reference,s_query,s_query_changed_color=NULL)
     ## INPUT:
     ## s_reference -- an atomic vector of reference sequence (will be along Ox axis)
     ## s_query -- an atomic vector of query sequence (will be along Oy axis)
@@ -101,16 +105,24 @@ drawDotplot <- function(s_reference,s_query)
     points_to_draw = lapply(1:length(s_reference),function(s){
         Ys = which(s_reference[s]==s_query)
         Xs = rep(s,times=length(Ys))
-        cbind(Xs,Ys)
+        if(is.null(s_query_changed_color)) {
+            change_color = rep(FALSE, times=length(Ys));
+        }else{
+            change_color = s_query_changed_color[which(s_reference[s]==s_query)];
+        }
+        cbind(Xs,Ys,change_color);
     });
 
     points_to_draw <- do.call(rbind.data.frame, points_to_draw);
+    points_to_draw$change_color <- as.logical(points_to_draw$change_color);
     
-    ggplot(points_to_draw,
-           aes(x=Xs,y=Ys)) +
-        geom_point(color="blue")+
+    ggplot(points_to_draw, aes(x=Xs, y=Ys, color=change_color)) +
+        geom_point()+
         xlab("Sequence 1 -- reference")+
         ylab("Sequence 2 -- query")+
         scale_x_continuous(breaks = with(points_to_draw, seq(min(Xs),max(Xs),by=round((max(Xs)-min(Xs))/no_of_Xticks))))+
-        scale_y_continuous(breaks = with(points_to_draw, seq(min(Ys),max(Ys),by=round((max(Ys)-min(Ys))/no_of_Yticks))))
+        scale_y_continuous(breaks = with(points_to_draw, seq(min(Ys),max(Ys),by=round((max(Ys)-min(Ys))/no_of_Yticks))))+
+        scale_color_manual(breaks = c(FALSE,TRUE), values=c("blue","red"))+
+        guides(color=FALSE)
+        
 }
