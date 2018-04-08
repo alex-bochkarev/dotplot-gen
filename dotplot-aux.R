@@ -18,7 +18,7 @@ no_of_Yticks <- no_of_Xticks;
 ################################################# 
 ## Allowed distortion functions
 
-insertion <- function(sequence, where, what)
+insertion <- function(sequence, where, what, returnText=FALSE)
     ## INPUT:
     ## sequence = vector of elements (blocks)
     ## where = after which position (block) to insert; indexing starts from ONE
@@ -34,11 +34,15 @@ insertion <- function(sequence, where, what)
         sequence <- c(what,sequence);        
     }
 
-    return(list(paste("Insertion of",length(what),"symbols at",where),sequence));
+    if(returnText){
+        return(list(paste("Insertion of",length(what),"symbols at",where),sequence));
+    }else{
+        return(sequence);
+    }
 
 }
 
-deletion <- function(sequence, where, howLong)
+deletion <- function(sequence, where, howLong, returnText=FALSE)
     ## INPUT:
     ## sequence = vector of elements (blocks)
     ## where = starting from which position to delete; indexing starts from ONE
@@ -55,10 +59,14 @@ deletion <- function(sequence, where, howLong)
     
     indices <- setdiff(1:length(sequence),(where):(where+howLong-1));
 
-    return(list(paste("Deletion of",howLong,"blocks starting from",where),sequence[indices]));
+    if(returnText){
+        return(list(paste("Deletion of",howLong,"blocks starting from",where),sequence[indices]));
+    }else{
+        return(sequence[indices]);
+    }
 }
 
-inversion <- function(sequence, where, howLong)
+inversion <- function(sequence, where, howLong, returnText=FALSE)
     ## INPUT:
     ## sequence = vector of elements (blocks)
     ## where = invert starting from which position (block); indexing starts from ONE
@@ -72,7 +80,12 @@ inversion <- function(sequence, where, howLong)
     howLong = min(howLong, length(sequence) - where+1);
     
     sequence[where:(where+howLong-1)] <- rev(sequence[where:(where+howLong-1)]);
-    return(list(paste("Inversion of", howLong,"pos, starting from",where),sequence));
+
+    if(returnText){
+        return(list(paste("Inversion of", howLong,"pos, starting from",where),sequence));
+    }else{
+        return(sequence);
+    }
 }
 
 

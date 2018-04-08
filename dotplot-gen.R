@@ -8,7 +8,6 @@ source("./dotplot-aux.R"); # load auxiliary functions for insertions, deletions,
 ## basic constants
     
 seqLength <- 100; # length of the sequences to be compared
-maxDepth <- 5; # maximum number of the events to be applied to the sequence
 numExamples <- 5; # number of files to generate
 numEvents <- 5; # number of events (ins, del or inv) to occur in each example
 
@@ -42,16 +41,16 @@ for (ex in 1:numExamples) # generate =numExamples= examples
         if(eventProb<=insertionProb){
             ## INSERTION happened
             rndDistLength = round(runif(1,1,round(length(seq)/2))); # uniform, half of the sequence max
-            s[[event+1]] = insertion(seq,rndPosition,rep(insBlock,times=rndDistLength));
+            s[[event+1]] = insertion(seq,rndPosition,rep(insBlock,times=rndDistLength),TRUE);
         }else if(eventProb<=insertionProb+inversionProb){
             ## INVERSION happened
             rndDistLength = round(runif(1,1,round(length(seq)/2))); # uniform, half of sequnece max
-            s[[event+1]] = inversion(seq,rndPosition,rndDistLength);
+            s[[event+1]] = inversion(seq,rndPosition,rndDistLength,TRUE);
 
         }else if(eventProb>insertionProb+inversionProb){
             ## DELETION happened
             rndDistLength = round(runif(1,1,round(length(seq)/2))); # uniform, half of sequence max
-            s[[event+1]] = deletion(seq,rndPosition,rndDistLength);
+            s[[event+1]] = deletion(seq,rndPosition,rndDistLength,TRUE);
             
         }
        
