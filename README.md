@@ -3,6 +3,10 @@
 This is a small script to generate:
 - sample (randomly generated) [dot-plot](https://en.wikipedia.org/wiki/Dot_plot_(bioinformatics)) graphs in `png` format;
 - corresponding history of events (inversions, insertions and deletions) -- also as a `png`-picture.
+
+The result looks like this:
+![Generate inversions history](/pics/Sample_10_stepwise.png)
+
  
 As a by-product the script offers several [functions](#useful-functions) that might be useful in the teaching process;
 
