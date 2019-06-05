@@ -5,9 +5,9 @@ This is a small script to generate:
 - corresponding history of events (inversions, insertions and deletions) -- also as a `png`-picture.
 
 The result looks like this:
-![Generate inversions history](/pics/Sample_10_stepwise.png)
+![Generated inversions history](pics/Sample_10_stepwise.jpeg)
+(it is also possible to save just one state as a separate `png`-file -- see the notes below)
 
- 
 As a by-product the script offers several [functions](#useful-functions) that might be useful in the teaching process;
 
 The script relies on `ggplot2`, `grid` and `gridExtra` packages for visualization.
@@ -34,7 +34,7 @@ install.packages(c("ggplot2","grid","gridExtra"));
   source("./dotplot-gen.R")
   ```
   when in the directory with two R-scripts. (go to the corresponding directory if necessary e.g. with `setwd("<directory>")` from the `R` console).
-  
+
 - sample dotplots will appear in `samples` directory
 - stepwise events are shown in combined plots with corresponding numbers in `stepwise` directory.
 
@@ -89,6 +89,9 @@ All the three functions return either a new sequence, or a list of two elements 
 
 The function `drawDotplot(s_reference, s_query)` takes two atomic vectors ("sequences") as input and return a `ggplot`-object (corresponding graph);
 
-In order to visually track inversions with another color a separate logical vector `color_change` is used (see `dotplot-gen.R`). 
+In order to visually track inversions with another color a separate logical vector `color_change` is used (see `dotplot-gen.R`).
 
 Please refer to comments in the code for further details.
+
+# Feedback
+If things do not function properly for some reason (e.g. a recent update have broken down something) or if you have a suggestion for improvement -- feel free to reach out to me by email or open an issue / feature request here in the repo.
